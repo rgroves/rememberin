@@ -1,16 +1,31 @@
 ---
+import { actions, isInputError } from "astro:actions";
+import { MarkdownEditor } from "../components/mke.react";
+import Layout from "../layouts/default.astro";
 
+export const prerender = false;
+
+console.log(Astro.request.method);
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  console.log(formData);
+  const { data, error } = await Astro.callAction(actions.notes.save, formData);
+  if (error) {
+    console.log(error.code);
+    if (isInputError(error)) {
+      console.log(error.issues);
+    }
+  } else {
+    console.log({ data });
+  }
+}
+
+const content = `# Sample Markdown\nList:\n\n* Item 1\n* Item 2 `;
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout>
+  <h1>Add Notes</h1>
+  <MarkdownEditor client:only="react" content={content}>
+    <div slot="fallback">Loading...</div>
+  </MarkdownEditor>
+</Layout>
