@@ -1,12 +1,6 @@
 import { defineAction } from "astro:actions";
-import { getSecret } from "astro:env/server";
 import { z } from "astro:schema";
-
-const AWS_ACCESS_KEY_ID = getSecret("AWS_ACCESS_KEY_ID");
-const AWS_ENDPOINT_URL_S3 = getSecret("AWS_ENDPOINT_URL_S3");
-const AWS_REGION = getSecret("AWS_REGION");
-const AWS_SECRET_ACCESS_KEY = getSecret("AWS_SECRET_ACCESS_KEY");
-const BUCKET_NAME = getSecret("BUCKET_NAME");
+import { S3Util, urlToKey } from "../utils";
 
 export const server = {
   notes: {
@@ -20,6 +14,21 @@ export const server = {
       handler: async (input) => {
         console.log("in action");
         console.log(input);
+
+        const { liUrl, liName, notes } = input;
+
+        const s3 = new S3Util();
+        // await s3.listBuckets();
+        // const data = await s3.getBucketObject({ objectKey: "test" });
+        // console.log(">>> AWS Bucket Object: test\n");
+        // console.log(await data.Body.transformToString());
+        // console.log("<<< AWS Bucket Object: test\n");
+
+        const objectKey = urlToKey(liUrl);
+        const data = { url: liUrl, name: liName, notes: notes };
+        console.log({ liUrl, objectKey, data });
+        const result = await s3.putBucketObject({ objectKey, data });
+        console.log({ result });
         return "ok";
       },
     }),

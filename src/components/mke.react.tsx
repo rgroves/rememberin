@@ -20,10 +20,11 @@ import { useRef, useState } from "react";
 
 interface MarkdownEditorProps {
   content: string | undefined;
+  jsonData: NoteData | undefined;
 }
 
-export const MarkdownEditor = ({ content }: MarkdownEditorProps) => {
-  const [notes, setNotes] = useState<string>(content || "");
+export const MarkdownEditor = ({ content, jsonData }: MarkdownEditorProps) => {
+  const [notes, setNotes] = useState<string>(jsonData?.notes || "");
   const ref = useRef<MDXEditorMethods>(null);
 
   return (
@@ -53,13 +54,25 @@ export const MarkdownEditor = ({ content }: MarkdownEditorProps) => {
             ),
           }),
         ]}
-        markdown={content || ""}
+        markdown={jsonData?.notes || ""}
       />
       <form method="POST">
         <label htmlFor="liUrl">LinkedIn URL:</label>
-        <input id="liUrl" name="liUrl" type="text" required />
+        <input
+          id="liUrl"
+          name="liUrl"
+          type="text"
+          required
+          defaultValue={jsonData?.url}
+        />
         <label htmlFor="liName">Name:</label>
-        <input id="liName" name="liName" type="text" required />
+        <input
+          id="liName"
+          name="liName"
+          type="text"
+          required
+          defaultValue={jsonData?.name}
+        />
         <textarea id="notes" name="notes" value={notes} readOnly />
         <button type="submit">Save</button>
       </form>

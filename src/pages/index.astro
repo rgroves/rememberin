@@ -2,30 +2,67 @@
 import { actions, isInputError } from "astro:actions";
 import { MarkdownEditor } from "../components/mke.react";
 import Layout from "../layouts/default.astro";
+import { S3Util, urlToKey } from "../utils";
+import { NoSuchKey } from "@aws-sdk/client-s3";
 
 export const prerender = false;
 
-console.log(Astro.request.method);
-if (Astro.request.method === "POST") {
-  const formData = await Astro.request.formData();
-  console.log(formData);
-  const { data, error } = await Astro.callAction(actions.notes.save, formData);
-  if (error) {
-    console.log(error.code);
-    if (isInputError(error)) {
-      console.log(error.issues);
-    }
-  } else {
-    console.log({ data });
-  }
-}
+let content = "";
+let jsonData: NoteData | undefined;
 
-const content = `# Sample Markdown\nList:\n\n* Item 1\n* Item 2 `;
+console.log(">>>");
+console.log(Astro.request.method);
+console.log(Astro.request.url);
+console.log(Astro.url);
+console.log("<<<");
+
+switch (Astro.request.method) {
+  case "GET":
+    const liUrl = Astro.url.searchParams.get("liUrl");
+    if (liUrl) {
+      const s3 = new S3Util();
+      const objectKey = urlToKey(liUrl);
+      try {
+        const response = await s3.getBucketObject({ objectKey });
+        const data = await response.Body.transformToString();
+        jsonData = JSON.parse(data) as NoteData;
+      } catch (error) {
+        if (error instanceof NoSuchKey) {
+          console.warn(`A note having key "${objectKey}" was not found.`);
+        } else {
+          console.error(error);
+          throw error;
+        }
+      }
+    }
+    break;
+
+  case "POST":
+    const formData = await Astro.request.formData();
+    console.log(formData);
+    const { data, error } = await Astro.callAction(
+      actions.notes.save,
+      formData
+    );
+    if (error) {
+      console.log(error.code);
+      if (isInputError(error)) {
+        console.log(error.issues);
+      }
+    } else {
+      console.log({ data });
+      return Astro.redirect(`/?liUrl=${formData.get("liUrl")}`);
+    }
+
+    break;
+  default:
+    content = "# Sample Markdown\nList:\n\n* Item 1\n* Item 2 ";
+}
 ---
 
 <Layout>
   <h1>Add Notes</h1>
-  <MarkdownEditor client:only="react" content={content}>
+  <MarkdownEditor client:only="react" content={content} jsonData={jsonData}>
     <div slot="fallback">Loading...</div>
   </MarkdownEditor>
 </Layout>
