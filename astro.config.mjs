@@ -5,6 +5,9 @@ import react from '@astrojs/react';
 
 import node from '@astrojs/node';
 
+import clerk from "@clerk/astro";
+
+
 // https://astro.build/config
 export default defineConfig({
   adapter: node({
@@ -21,6 +24,6 @@ export default defineConfig({
       }
     }
   },
-  integrations: [react()],
+  integrations: [clerk(), react()],
   output: "hybrid",
 });

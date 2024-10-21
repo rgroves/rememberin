@@ -1,5 +1,10 @@
 ---
-
+import {
+  SignedIn,
+  SignedOut,
+  UserButton,
+  SignInButton,
+} from "@clerk/astro/components";
 ---
 
 <html lang="en">
@@ -13,6 +18,16 @@
     </title>
   </head>
   <body>
+    <header>
+      <nav>
+        <SignedOut>
+          <SignInButton mode="modal" />
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+      </nav>
+    </header>
     <slot />
   </body>
 </html>
