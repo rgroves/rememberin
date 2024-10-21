@@ -32,7 +32,9 @@ RUN pnpm install --frozen-lockfile --prod=false
 COPY . .
 
 # Build application
-RUN pnpm run build
+RUN --mount=type=secret,id=CPK,env=PUBLIC_CLERK_PUBLISHABLE_KEY \
+    --mount=type=secret,id=CSK,env=CLERK_SECRET_KEY \
+    pnpm run build
 
 # Remove development dependencies
 RUN pnpm prune --prod
