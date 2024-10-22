@@ -20,6 +20,10 @@ label {
   display: block;
 }
 
+.mdxeditor {
+  margin-inline: 1rem;
+}
+
 .mdxeditor div[role="textbox"] {
   box-sizing: border-box;
   border: 2px solid rgb(118, 118, 118);
@@ -34,6 +38,7 @@ label {
 form button {
   font-size: 16px;
   line-height: 1.5rem;
-  margin-block-start: 1rem;
+  margin-block: 1rem;
+  margin-inline: 1rem;
   width: 100%;
 }
