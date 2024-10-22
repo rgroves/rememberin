@@ -15,7 +15,12 @@ export const server = {
       handler: async ({ userId, liUrl, liName, notes }, ctx) => {
         const s3 = new S3Util();
         const objectKey = `${userId}/${urlToKey(liUrl)}`;
-        const data = { url: liUrl, name: liName, notes: notes };
+        const data = {
+          userId,
+          url: liUrl,
+          name: liName,
+          notes: notes,
+        };
         const result = await s3.putBucketObject({ objectKey, data });
         return { success: true };
       },
