@@ -1,3 +1,4 @@
+import { experimental_withState } from "@astrojs/react/actions";
 import {
   BlockTypeSelect,
   BoldItalicUnderlineToggles,
@@ -16,16 +17,22 @@ import {
   type MDXEditorMethods,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
-import { useRef, useState } from "react";
+import { actions, isInputError } from "astro:actions";
+import { useActionState, useRef, useState } from "react";
 
 interface MarkdownEditorProps {
-  content: string | undefined;
-  jsonData: NoteData | undefined;
+  noteData: NoteData;
 }
 
-export const MarkdownEditor = ({ content, jsonData }: MarkdownEditorProps) => {
-  const [notes, setNotes] = useState<string>(jsonData?.notes || "");
+export const MarkdownEditor = ({ noteData }: MarkdownEditorProps) => {
+  const [notes, setNotes] = useState<string>(noteData.notes || "");
   const ref = useRef<MDXEditorMethods>(null);
+  const [state, action, pending] = useActionState(
+    experimental_withState(actions.notes.save),
+    { data: { success: false }, error: undefined }
+  );
+
+  const fieldErrors = isInputError(state.error) ? state.error.fields : {};
 
   return (
     <>
@@ -54,27 +61,37 @@ export const MarkdownEditor = ({ content, jsonData }: MarkdownEditorProps) => {
             ),
           }),
         ]}
-        markdown={jsonData?.notes || ""}
+        markdown={notes || ""}
       />
-      <form method="POST">
+      <form action={action}>
         <label htmlFor="liUrl">LinkedIn URL:</label>
         <input
           id="liUrl"
           name="liUrl"
           type="text"
           required
-          defaultValue={jsonData?.url}
+          defaultValue={noteData.url}
         />
+        {fieldErrors.liUrl && <p>{fieldErrors.liUrl}</p>}
         <label htmlFor="liName">Name:</label>
         <input
           id="liName"
           name="liName"
           type="text"
           required
-          defaultValue={jsonData?.name}
+          defaultValue={noteData.name}
         />
-        <textarea id="notes" name="notes" value={notes} readOnly />
-        <button type="submit">Save</button>
+        {fieldErrors.liName && <p>{fieldErrors.liName}</p>}
+        <textarea id="notes" name="notes" value={notes} readOnly hidden />
+        {fieldErrors.notes && <p>{fieldErrors.notes}</p>}
+        <input
+          id="userId"
+          name="userId"
+          type="hidden"
+          defaultValue={noteData.userId}
+        />
+        {fieldErrors.notes && <p>{fieldErrors.notes}</p>}
+        <button disabled={pending}>Save</button>
       </form>
     </>
   );

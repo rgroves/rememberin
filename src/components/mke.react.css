@@ -1,0 +1,39 @@
+form {
+  margin: 0 auto;
+  max-width: 65ch;
+}
+
+label,
+input {
+  font-size: 16px;
+  line-height: 1.5rem;
+  width: 100%;
+}
+
+input {
+  display: block;
+}
+
+label {
+  font-weight: bold;
+  margin-block-start: 1rem;
+  display: block;
+}
+
+.mdxeditor div[role="textbox"] {
+  box-sizing: border-box;
+  border: 2px solid rgb(118, 118, 118);
+  border-radius: 3px;
+}
+
+.mdxeditor div[role="textbox"]:focus {
+  border: 1.6px solid black;
+  border-radius: 3px;
+}
+
+form button {
+  font-size: 16px;
+  line-height: 1.5rem;
+  margin-block-start: 1rem;
+  width: 100%;
+}
