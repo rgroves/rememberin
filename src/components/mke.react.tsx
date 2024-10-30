@@ -3,12 +3,11 @@ import {
   BlockTypeSelect,
   BoldItalicUnderlineToggles,
   CreateLink,
-  DiffSourceToggleWrapper,
+  linkPlugin,
   ListsToggle,
   MDXEditor,
   UndoRedo,
   headingsPlugin,
-  diffSourcePlugin,
   linkDialogPlugin,
   listsPlugin,
   quotePlugin,
@@ -18,7 +17,7 @@ import {
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
 import { actions, isInputError } from "astro:actions";
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 interface MarkdownEditorProps {
   noteData: NoteData;
@@ -26,44 +25,74 @@ interface MarkdownEditorProps {
 
 export const MarkdownEditor = ({ noteData }: MarkdownEditorProps) => {
   const [notes, setNotes] = useState<string>(noteData.notes || "");
-  const ref = useRef<MDXEditorMethods>(null);
-  const [state, action, pending] = useActionState(
+  const [enableSave, setEnableSave] = useState(false);
+  const [formSaveState, formSaveAction, isFormSavePending] = useActionState(
     experimental_withState(actions.notes.save),
     { data: { success: false }, error: undefined }
   );
+  const [showSaveResult, setShowSaveResult] = useState(false);
+  const mdxEditorRef = useRef<MDXEditorMethods>(null);
+  const fieldErrors = isInputError(formSaveState.error)
+    ? formSaveState.error.fields
+    : {};
+  let saveResultInterval: number;
 
-  const fieldErrors = isInputError(state.error) ? state.error.fields : {};
+  useEffect(() => {
+    if (showSaveResult) {
+      saveResultInterval = setTimeout(() => {
+        setEnableSave(true);
+        setShowSaveResult(false);
+      }, 1250);
+    }
+  }, [showSaveResult]);
+
+  useEffect(() => {
+    setEnableSave(!isFormSavePending);
+    if (!isFormSavePending && !showSaveResult && formSaveState.data?.success) {
+      setShowSaveResult(true);
+    }
+  }, [isFormSavePending]);
+
+  useEffect(() => {
+    mdxEditorRef.current?.setMarkdown(notes);
+  }, [notes]);
 
   return (
     <>
       <MDXEditor
-        ref={ref}
-        onBlur={() => setNotes(ref.current?.getMarkdown() || "")}
+        ref={mdxEditorRef}
+        onChange={() => {
+          clearTimeout(saveResultInterval);
+          setNotes(mdxEditorRef.current?.getMarkdown() || "");
+          setEnableSave(true);
+          setShowSaveResult(false);
+        }}
         plugins={[
           linkDialogPlugin(),
           headingsPlugin(),
+          linkPlugin(),
           listsPlugin(),
-          diffSourcePlugin({
-            diffMarkdown: "An older version",
-            viewMode: "rich-text",
-          }),
           quotePlugin(),
           thematicBreakPlugin(),
           toolbarPlugin({
             toolbarContents: () => (
-              <DiffSourceToggleWrapper>
+              <>
                 <UndoRedo />
                 <BoldItalicUnderlineToggles />
                 <BlockTypeSelect />
                 <ListsToggle />
                 <CreateLink />
-              </DiffSourceToggleWrapper>
+              </>
             ),
           }),
         ]}
-        markdown={notes || ""}
+        // Note: Cannot set this to {notes} here, must use the useEffect that
+        //       calls setMarkdown on the mdxEditorRef. This is due to how the
+        //       mdx editor works where it will try to set the state of the
+        //       editor before the component mounts.
+        markdown=""
       />
-      <form action={action}>
+      <form action={formSaveAction}>
         <label htmlFor="liUrl">LinkedIn URL:</label>
         <input
           id="liUrl"
@@ -91,7 +120,24 @@ export const MarkdownEditor = ({ noteData }: MarkdownEditorProps) => {
           defaultValue={noteData.userId}
         />
         {fieldErrors.notes && <p>{fieldErrors.notes}</p>}
-        <button disabled={pending}>Save</button>
+        {showSaveResult ? (
+          <p
+            style={{
+              backgroundColor: "green",
+              color: "white",
+              marginBlockStart: "1rem",
+              minWidth: "100%",
+              padding: ".5rem",
+              textAlign: "center",
+            }}
+          >
+            Note Saved!
+          </p>
+        ) : (
+          <button disabled={isFormSavePending || !enableSave}>
+            {isFormSavePending ? "..." : "Save"}
+          </button>
+        )}
       </form>
     </>
   );
