@@ -1,0 +1,27 @@
+---
+import { isInputError } from "astro:actions";
+import { actions } from "astro:actions";
+
+const result = Astro.getActionResult(actions.notes.lookup);
+const fieldErrors = isInputError(result?.error) ? result.error.fields : {};
+
+// TODO Implement state sharing (https://docs.astro.build/en/recipes/sharing-state/)
+
+// TODO Implement multi-page redirect (index (search and alpha list of contacts -> notes pgae for contact))
+// if (result && !result.error) {
+// return Astro.redirect(`/notes/${result.data.id}`);
+// }
+---
+
+<form method="POST" action={actions.notes.lookup}>
+  <label for="liUrl">Find by LinkedIn Profile URL:</label>
+  <input
+    id="liUrl"
+    name="liUrl"
+    type="text"
+    placeholder="Enter contact's LinkedIn Profile URL"
+  />
+  {result?.data?.success === false && <p>Not found</p>}
+  {fieldErrors.liUrl && <p>URL: {fieldErrors.liUrl}</p>}
+  <button>Find</button>
+</form>

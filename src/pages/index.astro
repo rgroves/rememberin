@@ -1,9 +1,9 @@
 ---
-import { NoSuchKey } from "@aws-sdk/client-s3";
+import { AstroError } from "astro/errors";
+import LookupForm from "../components/LookupForm.astro";
 import { MarkdownEditor } from "../components/mke.react";
 import "../components/mke.react.css";
 import Layout from "../layouts/default.astro";
-import { S3Util, urlToKey } from "../utils";
 
 export const prerender = false;
 
@@ -19,33 +19,11 @@ let noteData: NoteData = {
   name: "",
   notes: "",
 };
-
-switch (Astro.request.method) {
-  case "GET":
-    const liUrl = Astro.url.searchParams.get("liUrl");
-    if (liUrl) {
-      const s3 = new S3Util();
-      const objectKey = `${userId}/${urlToKey(liUrl)}`;
-
-      try {
-        const response = await s3.getBucketObject({ objectKey });
-        const data = await response.Body.transformToString();
-        noteData = JSON.parse(data) as NoteData;
-      } catch (error) {
-        if (error instanceof NoSuchKey) {
-          console.warn(`A note having key "${objectKey}" was not found.`);
-        } else {
-          console.error(error);
-          throw error;
-        }
-      }
-    }
-    break;
-}
 ---
 
 <Layout>
   <h1>Add Notes</h1>
+  <LookupForm />
   <MarkdownEditor client:only="react" noteData={noteData}>
     <div slot="fallback">Loading...</div>
   </MarkdownEditor>
