@@ -119,7 +119,7 @@ export const MarkdownEditor = ({ noteData }: MarkdownEditorProps) => {
           type="hidden"
           defaultValue={noteData.userId}
         />
-        {fieldErrors.notes && <p>{fieldErrors.notes}</p>}
+        {fieldErrors.userId && <p>{fieldErrors.userId}</p>}
         {showSaveResult ? (
           <p
             style={{
