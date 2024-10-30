@@ -26,12 +26,12 @@ label {
 
 .mdxeditor div[role="textbox"] {
   box-sizing: border-box;
-  border: 2px solid rgb(118, 118, 118);
+  border: 1px solid rgb(118, 118, 118);
   border-radius: 3px;
 }
 
 .mdxeditor div[role="textbox"]:focus {
-  border: 1.6px solid black;
+  border: 2px solid black;
   border-radius: 3px;
 }
 
