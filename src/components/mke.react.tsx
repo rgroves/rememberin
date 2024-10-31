@@ -18,6 +18,7 @@ import {
 import "@mdxeditor/editor/style.css";
 import { actions, isInputError } from "astro:actions";
 import { useActionState, useEffect, useRef, useState } from "react";
+import type { NoteData } from "../types";
 
 interface MarkdownEditorProps {
   noteData: NoteData;

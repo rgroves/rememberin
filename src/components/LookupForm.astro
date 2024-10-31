@@ -1,10 +1,21 @@
 ---
 import { isInputError } from "astro:actions";
 import { actions } from "astro:actions";
+import { $noteData } from "../notesDataStore";
 
 const result = Astro.getActionResult(actions.notes.lookup);
 const fieldErrors = isInputError(result?.error) ? result.error.fields : {};
 
+if (result?.data?.success === true) {
+  $noteData.set(result.data.data);
+} else {
+  $noteData.set({
+    userId: "",
+    name: "",
+    url: "",
+    notes: "",
+  });
+}
 // TODO Implement state sharing (https://docs.astro.build/en/recipes/sharing-state/)
 
 // TODO Implement multi-page redirect (index (search and alpha list of contacts -> notes pgae for contact))

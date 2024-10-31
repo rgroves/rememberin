@@ -4,7 +4,7 @@ import LookupForm from "../components/LookupForm.astro";
 import { MarkdownEditor } from "../components/mke.react";
 import "../components/mke.react.css";
 import Layout from "../layouts/default.astro";
-
+import { $noteData } from "../notesDataStore";
 export const prerender = false;
 
 const userId = Astro.locals.auth().userId;
@@ -13,12 +13,17 @@ if (!userId) {
   throw new Error("Invalid user.");
 }
 
-let noteData: NoteData = {
-  userId: userId,
-  url: "",
-  name: "",
-  notes: "",
-};
+if (!$noteData.get()) {
+  const defaultNote = {
+    userId: userId,
+    url: "",
+    name: "",
+    notes: "",
+  };
+  $noteData.set(defaultNote);
+}
+
+let noteData = $noteData.get();
 ---
 
 <Layout>
