@@ -51,7 +51,6 @@ export const server = {
           }
         }
 
-        console.log(result);
         return result;
       },
     }),
