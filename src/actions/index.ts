@@ -10,9 +10,9 @@ export const server = {
     lookup: defineAction({
       accept: "form",
       input: z.object({
-        liUrl: z.string().url(),
+        url: z.string().url(),
       }),
-      handler: async ({ liUrl }, ctx) => {
+      handler: async ({ url }, ctx) => {
         const auth = ctx.locals.auth();
         const userId = auth.userId || "";
         if (!userId) {
@@ -22,7 +22,7 @@ export const server = {
         }
 
         const s3 = new S3Util();
-        const objectKey = `${userId}/${urlToKey(liUrl)}`;
+        const objectKey = `${userId}/${urlToKey(url)}`;
         let noteData: NoteData = {
           userId: userId,
           url: "",

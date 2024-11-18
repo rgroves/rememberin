@@ -16,7 +16,6 @@ if (result?.data?.success === true) {
     notes: "",
   });
 }
-// TODO Implement state sharing (https://docs.astro.build/en/recipes/sharing-state/)
 
 // TODO Implement multi-page redirect (index (search and alpha list of contacts -> notes pgae for contact))
 // if (result && !result.error) {
@@ -24,15 +23,172 @@ if (result?.data?.success === true) {
 // }
 ---
 
-<form method="POST" action={actions.notes.lookup}>
-  <label for="liUrl">Find by LinkedIn Profile URL:</label>
-  <input
-    id="liUrl"
-    name="liUrl"
-    type="text"
-    placeholder="Enter contact's LinkedIn Profile URL"
-  />
-  {result?.data?.success === false && <p>Not found</p>}
-  {fieldErrors.liUrl && <p>URL: {fieldErrors.liUrl}</p>}
-  <button>Find</button>
+<script>
+  function handleChange(e: Event): void {
+    document.getElementById("lookup-form-error-message")!.textContent = "";
+    document.getElementById("lookup-form-success-message")!.textContent = "";
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const inputElement = document.getElementById("lookup-form-url-input");
+    if (inputElement) {
+      inputElement.addEventListener("input", handleChange);
+    }
+  });
+</script>
+
+<form
+  action={actions.notes.lookup}
+  method="post"
+  aria-labelledby="lookup-form-url-form-label"
+  class="form-container"
+>
+  <h2 class="form-heading">Notes Search</h2>
+
+  <div class="form-inline">
+    <label
+      id="lookup-form-url-form-label"
+      for="lookup-form-url-input"
+      class="form-label"
+    >
+      LinkedIn Profile URL:
+    </label>
+    <input
+      type="url"
+      id="lookup-form-url-input"
+      name="url"
+      aria-describedby="error-message"
+      class="form-input"
+      aria-required="true"
+      aria-invalid="false"
+      required
+    />
+    <button
+      type="submit"
+      class="submit-button"
+      aria-label="Submit URL for search"
+    >
+      Search
+    </button>
+  </div>
+
+  <div
+    id="lookup-form-error-message"
+    class="error-message"
+    aria-live="polite"
+    role="alert"
+  >
+    {fieldErrors.url && <>URL: {fieldErrors.url}</>}
+    {result?.data?.success === false && <>No notes found.</>}
+  </div>
+  <div
+    id="lookup-form-success-message"
+    class="success-message"
+    aria-live="polite"
+    role="status"
+  >
+    {result?.data?.success === true && <>Found notes.</>}
+  </div>
 </form>
+
+<style>
+  .form-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .form-container {
+    margin: 1rem auto;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    max-width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: #ffffff;
+  }
+
+  .form-inline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .form-label {
+    flex: 0 1;
+    min-width: max-content;
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+    align-self: center;
+  }
+
+  .form-input {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: 1px solid #d1d1d1;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #0a66c2;
+    box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.2);
+  }
+
+  .error-message {
+    color: #d32f2f;
+    font-size: 0.875rem;
+    text-align: center;
+  }
+
+  .success-message {
+    color: #2e7d32;
+    font-size: 0.875rem;
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .submit-button {
+    flex: 0;
+    padding: 0.5rem 1rem;
+    background-color: #0a66c2;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+    margin-bottom: 0;
+  }
+
+  .submit-button:hover {
+    background-color: #004182;
+  }
+
+  .submit-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.2);
+  }
+
+  @media (min-width: 486px) {
+    .form-inline {
+      flex-direction: row;
+    }
+    .form-label {
+      margin: 1rem;
+    }
+    .submit-button {
+      margin-bottom: 1rem;
+    }
+    .success-message {
+      margin-top: 0;
+    }
+  }
+</style>
